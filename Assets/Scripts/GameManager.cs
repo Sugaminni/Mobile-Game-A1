@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class GameManager : MonoBehaviour
     public Transform rock;
 
     [Header("UI")]
-    public Text scoreText;
+    public TMP_Text scoreText;
     public GameObject gameOverPanel;
 
     [Header("Spawn Settings")]
@@ -33,6 +34,9 @@ public class GameManager : MonoBehaviour
 
         // Ensure player has reference back to this manager
         if (player != null) player.gameManager = this;
+
+        // Optional: ensure player starts at your intended spawn
+        if (player != null) player.ResetPlayer(playerSpawn);
 
         RespawnRock();
     }
@@ -81,7 +85,9 @@ public class GameManager : MonoBehaviour
         {
             float x = Random.Range(minX, maxX);
             float z = Random.Range(minZ, maxZ);
-            candidate = new Vector3(x, rockSpawnY, z);
+
+            // Spawn relative to the ground's center so it works even if ground isn't at (0,0,0)
+            candidate = new Vector3(ground.position.x + x, rockSpawnY, ground.position.z + z);
 
             safety++;
             if (safety > 50) break; // prevents infinite loop
@@ -96,5 +102,4 @@ public class GameManager : MonoBehaviour
         if (scoreText != null)
             scoreText.text = $"Score: {score}";
     }
-
 }

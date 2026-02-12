@@ -12,6 +12,10 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private bool isAlive = true;
 
+    // UI input values (for mobile buttons)
+    private float uiH = 0f;
+    private float uiV = 0f;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -22,13 +26,14 @@ public class PlayerController : MonoBehaviour
         if (!isAlive) return;
 
         // Keyboard input for testing (WASD / Arrow Keys)
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        // If UI buttons are being pressed, use those values instead
+        float h = Mathf.Abs(uiH) > 0.01f ? uiH : Input.GetAxis("Horizontal");
+        float v = Mathf.Abs(uiV) > 0.01f ? uiV : Input.GetAxis("Vertical");
 
         Vector3 force = new Vector3(h, 0f, v) * moveForce;
         rb.AddForce(force, ForceMode.Acceleration);
 
-        // Fail condition" fell off the platform
+        // Fail condition: fell off the platform
         if (transform.position.y < -5f)
         {
             isAlive = false;
@@ -44,6 +49,17 @@ public class PlayerController : MonoBehaviour
         {
             if (gameManager != null) gameManager.OnRockHit();
         }
+    }
+
+    // Called by UI Buttons 
+    public void SetHorizontal(float value)
+    {
+        uiH = value;
+    }
+
+    public void SetVertical(float value)
+    {
+        uiV = value;
     }
 
     public void ResetPlayer(Vector3 spawnPos)

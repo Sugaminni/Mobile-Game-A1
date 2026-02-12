@@ -28,12 +28,19 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 tiltZero; // calibration
 
+    [Header("Control UI References")]
+    public GameObject dpadUI;
+    public GameObject joystickUI;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
 
         // Save initial device tilt as baseline
         tiltZero = Input.acceleration;
+
+        // Make sure the correct UI is visible on start
+        ApplyControlUIVisibility();
     }
 
     private void FixedUpdate()
@@ -103,6 +110,12 @@ public class PlayerController : MonoBehaviour
     public void SetControlModeDPad()
     {
         controlMode = ControlMode.DPad;
+
+        // Stop leftover joystick values
+        uiH = 0f;
+        uiV = 0f;
+
+        ApplyControlUIVisibility();
     }
 
     public void SetControlModeTilt()
@@ -110,11 +123,15 @@ public class PlayerController : MonoBehaviour
         controlMode = ControlMode.Tilt;
         uiH = 0f;
         uiV = 0f;
+
+        ApplyControlUIVisibility();
     }
 
     public void SetControlModeJoystick()
     {
         controlMode = ControlMode.Joystick;
+
+        ApplyControlUIVisibility();
     }
 
     // Called by a UI button to recalibrate the tilt
@@ -127,6 +144,16 @@ public class PlayerController : MonoBehaviour
     {
         if (Mathf.Abs(value) < tiltDeadZone) return 0f;
         return value;
+    }
+
+    private void ApplyControlUIVisibility()
+    {
+        // Show only the UI that matches the current control mode
+        if (dpadUI != null)
+            dpadUI.SetActive(controlMode == ControlMode.DPad);
+
+        if (joystickUI != null)
+            joystickUI.SetActive(controlMode == ControlMode.Joystick);
     }
 
     public void ResetPlayer(Vector3 spawnPos)

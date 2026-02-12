@@ -9,14 +9,17 @@ public class GameManager : MonoBehaviour
     public Transform rock;
 
     [Header("UI")]
-    public Text scoreText; 
+    public Text scoreText;
     public GameObject gameOverPanel;
 
     [Header("Spawn Settings")]
     public Vector3 playerSpawn = new Vector3(0f, 0.5f, 0f);
     public float rockSpawnY = 0.5f;
-    public float spawnRangeX = 6f;
-    public float spawnRangeZ = 6f;
+
+    [Header("Ground Bounds")]
+    public Transform ground;
+    public float wallMargin = 1.5f;
+    public float minDistanceFromPlayer = 6f;
 
     private int score;
     private bool gameOver;
@@ -60,12 +63,32 @@ public class GameManager : MonoBehaviour
 
     private void RespawnRock()
     {
-        if (rock == null) return;
+        if (rock == null || ground == null) return;
 
-        float x = Random.Range(-spawnRangeX, spawnRangeX);
-        float z = Random.Range(-spawnRangeZ, spawnRangeZ);
+        // Scales the spawn area based on the ground's size
+        float halfWidth = (10f * ground.localScale.x) * 0.5f;
+        float halfDepth = (10f * ground.localScale.z) * 0.5f;
 
-        rock.position = new Vector3(x, rockSpawnY, z);
+        float minX = -halfWidth + wallMargin;
+        float maxX = halfWidth - wallMargin;
+        float minZ = -halfDepth + wallMargin;
+        float maxZ = halfDepth - wallMargin;
+
+        Vector3 candidate;
+        int safety = 0;
+
+        do
+        {
+            float x = Random.Range(minX, maxX);
+            float z = Random.Range(minZ, maxZ);
+            candidate = new Vector3(x, rockSpawnY, z);
+
+            safety++;
+            if (safety > 50) break; // prevents infinite loop
+        }
+        while (player != null && Vector3.Distance(candidate, player.transform.position) < minDistanceFromPlayer);
+
+        rock.position = candidate;
     }
 
     private void UpdateScoreUI()
@@ -73,4 +96,5 @@ public class GameManager : MonoBehaviour
         if (scoreText != null)
             scoreText.text = $"Score: {score}";
     }
+
 }

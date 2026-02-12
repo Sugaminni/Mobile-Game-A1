@@ -55,13 +55,8 @@ public class GameManager : MonoBehaviour
         if (gameOver) return;
 
         gameOver = true;
-
-        if (gameOverPanel != null) gameOverPanel.SetActive(true);
-    }
-
-    public void Restart()
-    {
-        // Reloads the current scene to reset everything 
+        
+        // Reloads scene
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
